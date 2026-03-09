@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Emprunts en cours{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <h1 class="mb-3"> Emprunts en cours ({{ emprunts|length }})</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {% if emprunts is empty %}
+        <div class="alert alert-info">Aucun emprunt en cours.</div>
+    {% else %}
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th> Livre</th>
+                <th> Emprunteur</th>
+                <th> Date emprunt</th>
+                <th> Retour prévu</th>
+                <th> Statut</th>
+                <th> Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emprunt in emprunts %}
+            <tr>
+                <td>{{ emprunt.book.titre }}</td>
+                <td>{{ emprunt.user.nom }}</td>
+                <td>{{ emprunt.dateEmprunt|date('d/m/Y') }}</td>
+                <td>
+                    {% if emprunt.statut == 'en_cours' %}
+                        <span class="badge bg-warning text-dark">EN COURS</span>
+                    {% elseif emprunt.statut == 'termine' %}
+                        <span class="badge bg-success">TERMINÉ</span>
+                    {% else %}
+                        <span class="badge bg-danger">RETARDÉ</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if emprunt.dateRetour %}
+                        {{ emprunt.dateRetour|date('d/m/Y') }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_emprunt_detail', {id: emprunt.id}) }}" class="btn btn-sm btn-primary">Détail</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</div>
+{% endblock %}

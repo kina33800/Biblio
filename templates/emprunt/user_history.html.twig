@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique de {{ user.nom }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <h1 class="mb-3"> Historique de {{ user.nom }}
+        <small class="text-muted fs-5">({{ emprunts|length }} {{ emprunts|length > 1 ? 'emprunts' : 'emprunt' }})</small>
+    </h1>
+
+    {% if emprunts is empty %}
+        <div class="alert alert-info">Aucun emprunt pour cet utilisateur.</div>
+    {% else %}
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th> Livre</th>
+                <th> Date emprunt</th>
+                <th> Date retour</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emprunt in emprunts %}
+            <tr>
+                <td>{{ emprunt.book.titre }}</td>
+                <td>{{ emprunt.dateEmprunt|date('d/m/Y') }}</td>
+                <td>
+                    {{ emprunt.dateRetour ? emprunt.dateRetour|date('d/m/Y') : '—' }}
+                </td>
+                <td>
+                    {% if emprunt.statut == 'en_cours' %}
+                        <span class="badge bg-warning text-dark">EN COURS</span>
+                    {% elseif emprunt.statut == 'termine' %}
+                        <span class="badge bg-success">TERMINÉ</span>
+                    {% else %}
+                        <span class="badge bg-danger">RETARDÉ</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <a href="{{ path('app_emprunt') }}" class="btn btn-secondary mt-2">← Retour</a>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Emprunt - {{ book.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4" style="max-width: 600px;">
+
+    <h1 class="mb-1">📖 EMPRUNT - {{ book.titre }}</h1>
+    <p class="text-muted mb-4">
+        {% if book.stock > 0 %}
+            <span class="text-success fw-bold">{{ book.stock }} exemplaire(s) disponible(s)</span>
+        {% else %}
+            <span class="text-danger fw-bold">Aucun exemplaire disponible</span>
+        {% endif %}
+    </p>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+
+        <div class="mb-3">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.telephone) }}
+            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">✅ ENREGISTRER L'EMPRUNT</button>
+
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_book_index') }}" class="btn btn-secondary mt-3">← Retour au catalogue</a>
+
+</div>
+{% endblock %}

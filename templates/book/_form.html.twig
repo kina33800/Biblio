@@ -1,0 +1,25 @@
+{{ form_start(form) }}
+
+    <div class="mb-3">
+        {{ form_label(form.titre) }}
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.auter) }}
+        {{ form_widget(form.auter, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.isbn) }}
+        {{ form_widget(form.isbn, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.stock) }}
+        {{ form_widget(form.stock, {'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+
+{{ form_end(form) }}

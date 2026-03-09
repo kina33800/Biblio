@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de l'emprunt{% endblock %}
+
+{% block body %}
+<div class="container mt-4" style="max-width: 600px;">
+
+    <h1 class="mb-4">📋 Détail de l'emprunt</h1>
+
+    <div class="card mb-3">
+        <div class="card-header bg-dark text-white">📚 Livre</div>
+        <div class="card-body">
+            <p><strong>Titre :</strong> {{ emprunt.book.titre }}</p>
+            <p><strong>Auteur :</strong> {{ emprunt.book.auter }}</p>
+            <p><strong>ISBN :</strong> {{ emprunt.book.isbn }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header bg-dark text-white">👤 Emprunteur</div>
+        <div class="card-body">
+            <p><strong>Nom :</strong> {{ emprunt.user.nom }}</p>
+            <p><strong>Email :</strong> {{ emprunt.user.email }}</p>
+            <p><strong>Téléphone :</strong> {{ emprunt.user.telephone ?? '—' }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header bg-dark text-white">📅 Dates</div>
+        <div class="card-body">
+            <p><strong>Date d'emprunt :</strong> {{ emprunt.dateEmprunt|date('d/m/Y') }}</p>
+            <p><strong>Date de retour :</strong> {{ emprunt.dateRetour ? emprunt.dateRetour|date('d/m/Y') : '—' }}</p>
+            <p>
+                <strong>Statut :</strong>
+                {% if emprunt.statut == 'en_cours' %}
+                    <span class="badge bg-warning text-dark">EN COURS</span>
+                {% elseif emprunt.statut == 'termine' %}
+                    <span class="badge bg-success">TERMINÉ</span>
+                {% else %}
+                    <span class="badge bg-danger">RETARDÉ</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if emprunt.statut == 'en_cours' %}
+        <a href="{{ path('app_emprunt_rendre', {id: emprunt.id}) }}" 
+           class="btn btn-success"
+           onclick="return confirm('Confirmer le retour du livre ?')">
+            ✅ Marquer comme rendu
+        </a>
+    {% endif %}
+
+    <a href="{{ path('app_emprunt') }}" class="btn btn-secondary ms-2">← Retour</a>
+</div>
+{% endblock %}
