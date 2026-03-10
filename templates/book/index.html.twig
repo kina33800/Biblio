@@ -33,8 +33,15 @@
             <tr>
                 <td>
                     {% if book.image %}
-                        <img src="{{ book.image }}" alt="{{ book.titre }}" 
-                            style="height: 80px; object-fit: cover; border-radius: 4px;">
+                        <div class="position-relative d-inline-block cover-container">
+                            <img src="{{ book.image }}" alt="{{ book.titre }}" 
+                                style="height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer;">
+                            {% if book.aperçu %}
+                            <div class="cover-popup">
+                                <p class="mb-0" style="font-size: 0.8rem;">{{ book.aperçu }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     {% else %}
                         <span class="text-muted">—</span>
                     {% endif %}
@@ -57,14 +64,15 @@
                         {% endif %}
                     {% endif %}
                 </td>
-                <td>
-                    <a href="{{ path('app_emprunt_new', {'id': book.id}) }}" class="btn btn-sm btn-primary">EMPRUNTER</a>
-                    <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Éditer</a>
-                    <form method="post" action="{{ path('app_book_delete', {'id': book.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce livre ?')">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
-                        <button class="btn btn-sm btn-danger">Supprimer</button>
-                    </form>
-                </td>
+                    <td>
+                        <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">👁 Voir</a>
+                        <a href="{{ path('app_emprunt_new', {'id': book.id}) }}" class="btn btn-sm btn-primary">EMPRUNTER</a>
+                        <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Éditer</a>
+                        <form method="post" action="{{ path('app_book_delete', {'id': book.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce livre ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    </td>
             </tr>
         {% else %}
             <tr>

@@ -28,10 +28,8 @@ class FetchCoversCommand extends Command
         $books = $this->bookRepository->findAll();
 
         foreach ($books as $book) {
-            // On extrait juste le nom du manga sans le numéro de tome
             $titre = preg_replace('/\s+T\d+$/i', '', $book->getTitre());
-
-            $io->text("Recherche cover pour : $titre");
+            $io->text("Recherche pour : $titre");
 
             try {
                 $response = $this->httpClient->request('GET', 'https://api.jikan.moe/v4/manga', [
@@ -40,15 +38,23 @@ class FetchCoversCommand extends Command
 
                 $data = $response->toArray();
 
-                if (!empty($data['data'][0]['images']['jpg']['image_url'])) {
-                    $imageUrl = $data['data'][0]['images']['jpg']['image_url'];
-                    $book->setImage($imageUrl);
-                    $io->success("Cover trouvée : $imageUrl");
-                } else {
-                    $io->warning("Aucune cover trouvée pour $titre");
+                if (!empty($data['data'][0])) {
+                    $manga = $data['data'][0];
+
+                    // Cover
+                    if (!empty($manga['images']['jpg']['large_image_url'])) {
+                        $book->setImage($manga['images']['jpg']['large_image_url']);
+                        $io->text("✅ Cover : " . $manga['images']['jpg']['large_image_url']);
+                    }
+
+                    // Aperçu — on prend le synopsis comme texte d'accroche
+                    if (!empty($manga['synopsis'])) {
+                        $synopsis = mb_substr($manga['synopsis'], 0, 300) . '...';
+                        $book->setAperçu($synopsis);
+                        $io->text("✅ Synopsis récupéré");
+                    }
                 }
 
-                // Pause pour ne pas surcharger l'API (limite : 3 req/sec)
                 sleep(1);
 
             } catch (\Exception $e) {
@@ -57,7 +63,7 @@ class FetchCoversCommand extends Command
         }
 
         $this->em->flush();
-        $io->success('Toutes les covers ont été mises à jour !');
+        $io->success('Covers et aperçus mis à jour !');
 
         return Command::SUCCESS;
     }
