@@ -54,4 +54,20 @@ class EmpruntRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findTop5DernierMois(): array
+    {
+        $debut = new \DateTimeImmutable('-30 days');
+
+        return $this->createQueryBuilder('e')
+            ->select('b.id, b.titre, b.image, COUNT(e.id) as total')
+            ->join('e.book', 'b')
+            ->andWhere('e.dateEmprunt >= :debut')
+            ->setParameter('debut', $debut)
+            ->groupBy('b.id')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+    }
 }

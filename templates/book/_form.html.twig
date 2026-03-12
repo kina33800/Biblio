@@ -1,25 +1,25 @@
 {{ form_start(form) }}
 
     <div class="mb-3">
-        {{ form_label(form.titre) }}
-        {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+        <label style="color: var(--gold); font-weight: 600; display: block; margin-bottom: 6px;">Titre</label>
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: One Piece T1'}}) }}
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.auter) }}
-        {{ form_widget(form.auter, {'attr': {'class': 'form-control'}}) }}
+        <label style="color: var(--gold); font-weight: 600; display: block; margin-bottom: 6px;">Auteur</label>
+        {{ form_widget(form.auter, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Eiichiro Oda'}}) }}
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.isbn) }}
-        {{ form_widget(form.isbn, {'attr': {'class': 'form-control'}}) }}
+        <label style="color: var(--gold); font-weight: 600; display: block; margin-bottom: 6px;">ISBN</label>
+        {{ form_widget(form.isbn, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 9782344012345'}}) }}
     </div>
 
     <div class="mb-3">
-        {{ form_label(form.stock) }}
-        {{ form_widget(form.stock, {'attr': {'class': 'form-control'}}) }}
+        <label style="color: var(--gold); font-weight: 600; display: block; margin-bottom: 6px;">Stock</label>
+        {{ form_widget(form.stock, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 3'}}) }}
     </div>
 
-    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+    <button class="btn btn-gold w-100 py-2 mt-2">{{ button_label|default('Enregistrer') }}</button>
 
 {{ form_end(form) }}

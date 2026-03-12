@@ -32,6 +32,24 @@ class BookRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findBySearch(string $search): array
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.titre LIKE :search OR b.auter LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->orderBy('b.titre', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findNouveautes(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('b')
+            ->orderBy('b.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return Book[] Returns an array of Book objects
     //     */

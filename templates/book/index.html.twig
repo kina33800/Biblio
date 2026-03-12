@@ -5,7 +5,7 @@
 {% block body %}
 <div class="container mt-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>📚 Catalogue des Livres</h1>
         <div>
             <a href="{{ path('app_book_new') }}" class="btn btn-success">+ Ajouter Livre</a>
@@ -16,71 +16,144 @@
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
+    {% if top5 is not empty %}
+    <div class="mb-5">
+        <div class="row">
 
-    <table class="table table-bordered table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Couverture</th>
-                <th>Titre</th>
-                <th>Auteur</th>
-                <th>ISBN</th>
-                <th>Stock</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for book in books %}
-            <tr>
-                <td>
-                    {% if book.image %}
-                        <div class="position-relative d-inline-block cover-container">
-                            <img src="{{ book.image }}" alt="{{ book.titre }}" 
-                                style="height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer;">
-                            {% if book.aperçu %}
-                            <div class="cover-popup">
-                                <p class="mb-0" style="font-size: 0.8rem;">{{ book.aperçu }}</p>
+            <!-- TOP 5 -->
+            <div class="col-md-6">
+                <h2 class="mb-3">🏆 Top 5 du mois</h2>
+                <div class="d-flex gap-3 overflow-auto pb-2">
+                    {% for item in top5 %}
+                    <a href="{{ path('app_book_show', {'id': item.id}) }}" style="text-decoration: none; min-width: 120px;" class="text-center">
+                        <div class="position-relative d-inline-block">
+                            <div style="
+                                position: absolute; top: -12px; left: -12px;
+                                width: 36px; height: 36px;
+                                border-radius: 50%;
+                                background: {% if loop.index == 1 %}#FFD700{% elseif loop.index == 2 %}#C0C0C0{% elseif loop.index == 3 %}#CD7F32{% else %}var(--noir-soft){% endif %};
+                                color: #000;
+                                display: flex; align-items: center; justify-content: center;
+                                font-weight: 700; font-size: 0.9rem;
+                                border: 2px solid var(--gold);
+                                z-index: 2;">
+                                {{ loop.index }}
                             </div>
+                            {% if item.image %}
+                                <img src="{{ item.image }}" alt="{{ item.titre }}"
+                                    style="height: 160px; width: 110px; object-fit: cover; border-radius: 8px;
+                                            border: 2px solid var(--gold); box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+                                            transition: transform 0.3s;"
+                                    onmouseover="this.style.transform='translateY(-5px)'"
+                                    onmouseout="this.style.transform='translateY(0)'">
+                            {% else %}
+                                <div style="height: 160px; width: 110px; background: var(--noir-soft); border-radius: 8px; border: 2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:2rem;">📚</div>
                             {% endif %}
                         </div>
+                        <p style="font-size: 0.75rem; margin-top: 10px; font-weight: 600; color: var(--gold);">
+                            {{ item.titre|slice(0, 20) }}{% if item.titre|length > 20 %}...{% endif %}
+                        </p>
+                        <p style="font-size: 0.7rem; color: var(--gold-dark);">{{ item.total }} emprunt(s)</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- NOUVEAUTÉS -->
+            <div class="col-md-6">
+                <h2 class="mb-3">✨ Nouveautés</h2>
+                <div class="d-flex flex-column gap-3">
+                    {% for book in nouveautes %}
+                    <a href="{{ path('app_book_show', {'id': book.id}) }}" style="text-decoration: none;">
+                        <div class="d-flex align-items-center gap-3" style="background: rgba(20,20,20,0.7); border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 10px; transition: border-color 0.3s;"
+                            onmouseover="this.style.borderColor='var(--gold)'"
+                            onmouseout="this.style.borderColor='rgba(201,168,76,0.2)'">
+                            {% if book.image %}
+                                <img src="{{ book.image }}" alt="{{ book.titre }}"
+                                    style="height: 60px; width: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gold);">
+                            {% else %}
+                                <div style="height: 60px; width: 45px; background: var(--noir-soft); border-radius: 6px; display:flex; align-items:center; justify-content:center;">📚</div>
+                            {% endif %}
+                            <div>
+                                <p style="font-size: 0.85rem; font-weight: 600; color: var(--gold); margin: 0;">{{ book.titre }}</p>
+                                <p style="font-size: 0.75rem; color: #888; margin: 0;">{{ book.auter }}</p>
+                                <span style="font-size: 0.65rem; background: var(--gold); color: var(--noir); padding: 2px 8px; border-radius: 20px; font-weight: 700;">NEW</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
+    {% for book in books %}
+        <div class="col">
+            <div class="manga-card h-100">
+
+                <!-- Cover -->
+                <div class="manga-card-img-wrapper">
+                    {% if book.image %}
+                        <img src="{{ book.image }}" alt="{{ book.titre }}" class="manga-card-img">
                     {% else %}
-                        <span class="text-muted">—</span>
+                        <div class="manga-card-no-img">📚</div>
                     {% endif %}
-                </td>
-                <td>{{ book.titre }}</td>
-                <td>{{ book.auter }}</td>
-                <td>{{ book.isbn }}</td>
-                <td>
+
+                    <!-- Overlay au survol -->
+                    <div class="manga-card-overlay">
+                        {% if book.aperçu %}
+                            <p class="manga-synopsis">{{ book.aperçu|slice(0, 150) }}...</p>
+                        {% endif %}
+                        <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-light mt-2">👁 Voir plus</a>
+                    </div>
+
+                    <!-- Badge stock -->
+                    <div class="manga-stock-badge {% if book.stock > 0 %}badge-dispo{% else %}badge-indispo{% endif %}">
+                        {% if book.stock > 0 %}✅ Dispo{% else %}❌ Épuisé{% endif %}
+                    </div>
+                </div>
+
+                <!-- Infos -->
+                <div class="manga-card-body">
+                    <h6 class="manga-card-title">{{ book.titre }}</h6>
+                    <p class="manga-card-author">{{ book.auter }}</p>
+
+                <div class="manga-card-actions">
                     {% if book.stock > 0 %}
-                        <span class="text-success fw-bold">{{ book.stock }}</span>
+                        <a href="{{ path('app_emprunt_new', {'id': book.id}) }}" class="btn btn-sm btn-primary w-100 mb-1">📖 Emprunter</a>
                     {% else %}
-                        <span class="text-danger fw-bold">0</span>
                         {% set retour = bookRepository.findProchainRetour(book.id) %}
                         {% if retour and retour.dateRetour %}
-                            <br><small class="text-muted">
-                                📅 Retour prévu le {{ retour.dateRetour|date('d/m/Y') }}
-                            </small>
+                            <div class="w-100 mb-1 text-center p-1 rounded" style="background:#fff3cd; font-size:0.78rem;">
+                                📅 Retour prévu<br>
+                                <strong>{{ retour.dateRetour|date('d/m/Y') }}</strong>
+                            </div>
                         {% else %}
-                            <br><small class="text-muted">⚠️ Aucune date de retour connue</small>
+                            <div class="w-100 mb-1 text-center p-1 rounded" style="background:#f8d7da; font-size:0.78rem;">
+                                ⚠️ Date inconnue
+                            </div>
                         {% endif %}
                     {% endif %}
-                </td>
-                    <td>
-                        <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">👁 Voir</a>
-                        <a href="{{ path('app_emprunt_new', {'id': book.id}) }}" class="btn btn-sm btn-primary">EMPRUNTER</a>
-                        <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Éditer</a>
-                        <form method="post" action="{{ path('app_book_delete', {'id': book.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce livre ?')">
+                    <div class="d-flex gap-1">
+                        <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning flex-fill">✏️</a>
+                        <form method="post" action="{{ path('app_book_delete', {'id': book.id}) }}" class="flex-fill" onsubmit="return confirm('Supprimer ce livre ?')">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ book.id) }}">
-                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">🗑</button>
                         </form>
-                    </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5" class="text-center">Aucun livre dans le catalogue.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">Aucun livre dans le catalogue.</div>
+        </div>
+    {% endfor %}
+    </div>
 
 </div>
 {% endblock %}

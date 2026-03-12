@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil — Mangaverse{% endblock %}
+
+{% block body %}
+<div class="container mt-4" style="max-width: 800px;">
+
+    <!-- Header profil -->
+    <div class="text-center mb-4">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem;">
+            👤
+        </div>
+        <h1 class="mt-2">{{ user.nom }}</h1>
+        <p style="color: #aaa;">{{ user.email }}</p>
+        {% if user.telephone %}
+            <p style="color: #aaa;">📞 {{ user.telephone }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Stats rapides -->
+    <div class="row mb-4 text-center">
+        <div class="col-4">
+            <div class="card p-3" style="background: rgba(20,20,20,0.92); border: 1px solid var(--gold); border-radius: 12px;">
+                <h3 style="color: var(--gold);">{{ emprunts|length }}</h3>
+                <small style="color: #aaa;">Total emprunts</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card p-3" style="background: rgba(20,20,20,0.92); border: 1px solid var(--gold); border-radius: 12px;">
+                <h3 style="color: var(--gold);">
+                    {{ emprunts|filter(e => e.statut == 'en_cours')|length }}
+                </h3>
+                <small style="color: #aaa;">En cours</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card p-3" style="background: rgba(20,20,20,0.92); border: 1px solid var(--gold); border-radius: 12px;">
+                <h3 style="color: var(--gold);">
+                    {{ emprunts|filter(e => e.statut == 'termine')|length }}
+                </h3>
+                <small style="color: #aaa;">Terminés</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="card" style="background: rgba(20,20,20,0.92); border: 1px solid var(--gold); border-radius: 16px;">
+        <div class="card-body p-4">
+            <h5 style="color: var(--gold);">📋 Historique des emprunts</h5>
+            <hr style="border-color: #333;">
+
+            {% if emprunts is empty %}
+                <p style="color: #aaa;" class="text-center">Aucun emprunt pour le moment.</p>
+            {% else %}
+                <table class="table" style="color: #ccc;">
+                    <thead>
+                        <tr style="border-color: #333;">
+                            <th style="color: var(--gold);">Manga</th>
+                            <th style="color: var(--gold);">Emprunté le</th>
+                            <th style="color: var(--gold);">Retour prévu</th>
+                            <th style="color: var(--gold);">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emprunt in emprunts %}
+                        <tr style="border-color: #333;">
+                            <td>
+                                {% if emprunt.book.image %}
+                                    <img src="{{ emprunt.book.image }}" style="height: 40px; border-radius: 4px; margin-right: 8px;">
+                                {% endif %}
+                                {{ emprunt.book.titre }}
+                            </td>
+                            <td>{{ emprunt.dateEmprunt|date('d/m/Y') }}</td>
+                            <td>{{ emprunt.dateRetour ? emprunt.dateRetour|date('d/m/Y') : '—' }}</td>
+                            <td>
+                                {% if emprunt.statut == 'en_cours' %}
+                                    <span class="badge bg-warning text-dark">EN COURS</span>
+                                {% elseif emprunt.statut == 'termine' %}
+                                    <span class="badge bg-success">TERMINÉ</span>
+                                {% else %}
+                                    <span class="badge bg-danger">RETARDÉ</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ path('app_book_index') }}" class="btn btn-outline-gold me-2">← Catalogue</a>
+        <a href="{{ logout_path() }}" class="btn btn-outline-danger">Se déconnecter</a>
+    </div>
+
+</div>
+{% endblock %}

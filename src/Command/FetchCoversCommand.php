@@ -28,42 +28,113 @@ class FetchCoversCommand extends Command
         $books = $this->bookRepository->findAll();
 
         foreach ($books as $book) {
-            $titre = preg_replace('/\s+T\d+$/i', '', $book->getTitre());
-            $io->text("Recherche pour : $titre");
+            $titreComplet = $book->getTitre();
+            $titreSansVolume = preg_replace('/\s+T\d+$/i', '', $titreComplet);
+
+            // Extraire le numéro de tome
+            preg_match('/T(\d+)$/i', $titreComplet, $matches);
+            $volume = $matches[1] ?? null;
+
+            $io->text("🔍 Recherche : $titreComplet (Volume: $volume)");
 
             try {
-                $response = $this->httpClient->request('GET', 'https://api.jikan.moe/v4/manga', [
-                    'query' => ['q' => $titre, 'limit' => 1]
+                // Étape 1 — Chercher le manga sur MangaDex
+                $searchResponse = $this->httpClient->request('GET', 'https://api.mangadex.org/manga', [
+                    'query' => [
+                        'title'                => $titreSansVolume,
+                        'limit'                => 1,
+                        'contentRating[]'      => 'safe',
+                        'availableTranslatedLanguage[]' => 'fr',
+                    ]
                 ]);
 
-                $data = $response->toArray();
+                $searchData = $searchResponse->toArray();
 
-                if (!empty($data['data'][0])) {
-                    $manga = $data['data'][0];
+                if (empty($searchData['data'][0])) {
+                    // Retry sans filtre de langue
+                    $searchResponse = $this->httpClient->request('GET', 'https://api.mangadex.org/manga', [
+                        'query' => ['title' => $titreSansVolume, 'limit' => 1]
+                    ]);
+                    $searchData = $searchResponse->toArray();
+                }
 
-                    // Cover
-                    if (!empty($manga['images']['jpg']['large_image_url'])) {
-                        $book->setImage($manga['images']['jpg']['large_image_url']);
-                        $io->text("✅ Cover : " . $manga['images']['jpg']['large_image_url']);
+                if (!empty($searchData['data'][0])) {
+                    $mangaId = $searchData['data'][0]['id'];
+                    $io->text("   → MangaDex ID : $mangaId");
+
+                    sleep(1);
+
+                    // Étape 2 — Chercher la cover du bon volume
+                    $coverQuery = [
+                        'manga[]' => $mangaId,
+                        'limit'   => 100,
+                        'order[volume]' => 'asc',
+                    ];
+
+                    if ($volume) {
+                        $coverQuery['volume[]'] = (string)(int)$volume;
                     }
 
-                    // Aperçu — on prend le synopsis comme texte d'accroche
-                    if (!empty($manga['synopsis'])) {
-                        $synopsis = mb_substr($manga['synopsis'], 0, 300) . '...';
-                        $book->setAperçu($synopsis);
-                        $io->text("✅ Synopsis récupéré");
+                    // Étape 2 — Récupérer toutes les covers et filtrer par volume
+                    $coverResponse = $this->httpClient->request('GET', 'https://api.mangadex.org/cover', [
+                        'query' => [
+                            'manga[]'        => $mangaId,
+                            'limit'          => 100,
+                            'order[volume]'  => 'asc',
+                        ]
+                    ]);
+
+                    $coverData = $coverResponse->toArray();
+
+                    $coverFound = false;
+                    if (!empty($coverData['data'])) {
+                        // Chercher la cover du bon volume
+                        foreach ($coverData['data'] as $cover) {
+                            $coverVolume = $cover['attributes']['volume'] ?? null;
+                            $fileName    = $cover['attributes']['fileName'];
+
+                            if ($volume && (string)(int)$coverVolume === (string)(int)$volume) {
+                                $imageUrl = "https://uploads.mangadex.org/covers/$mangaId/$fileName";
+                                $book->setImage($imageUrl);
+                                $io->success("✅ Cover V$coverVolume trouvée");
+                                $coverFound = true;
+                                break;
+                            }
+                        }
+
+                        // Fallback — première cover disponible
+                        if (!$coverFound) {
+                            $fileName = $coverData['data'][0]['attributes']['fileName'];
+                            $imageUrl = "https://uploads.mangadex.org/covers/$mangaId/$fileName";
+                            $book->setImage($imageUrl);
+                            $io->warning("⚠️ Cover fallback utilisée");
+                        }
                     }
+
+                    // Étape 3 — Synopsis depuis Jikan
+                    sleep(1);
+                    $jikanResponse = $this->httpClient->request('GET', 'https://api.jikan.moe/v4/manga', [
+                        'query' => ['q' => $titreSansVolume, 'limit' => 1]
+                    ]);
+                    $jikanData = $jikanResponse->toArray();
+                    if (!empty($jikanData['data'][0]['synopsis'])) {
+                        $book->setAperçu(mb_substr($jikanData['data'][0]['synopsis'], 0, 300) . '...');
+                        $io->text("   ✅ Synopsis récupéré");
+                    }
+
+                } else {
+                    $io->warning("Aucun résultat MangaDex pour : $titreSansVolume");
                 }
 
                 sleep(1);
 
             } catch (\Exception $e) {
-                $io->error("Erreur pour $titre : " . $e->getMessage());
+                $io->error("Erreur pour $titreComplet : " . $e->getMessage());
             }
         }
 
         $this->em->flush();
-        $io->success('Covers et aperçus mis à jour !');
+        $io->success('✅ Terminé !');
 
         return Command::SUCCESS;
     }

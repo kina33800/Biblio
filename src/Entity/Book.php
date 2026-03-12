@@ -39,9 +39,16 @@ class Book
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $aperçu = null;
 
+    /**
+     * @var Collection<int, Commentaire>
+     */
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'book', orphanRemoval: true)]
+    private Collection $commentaires;
+
     public function __construct()
     {
         $this->emprunts = new ArrayCollection();
+        $this->commentaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -147,6 +154,36 @@ class Book
     public function setAperçu(?string $aperçu): static
     {
         $this->aperçu = $aperçu;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commentaire>
+     */
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+    }
+
+    public function addCommentaire(Commentaire $commentaire): static
+    {
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires->add($commentaire);
+            $commentaire->setBook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentaire(Commentaire $commentaire): static
+    {
+        if ($this->commentaires->removeElement($commentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($commentaire->getBook() === $this) {
+                $commentaire->setBook(null);
+            }
+        }
 
         return $this;
     }

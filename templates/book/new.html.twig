@@ -3,12 +3,21 @@
 {% block title %}Nouveau Livre{% endblock %}
 
 {% block body %}
-<div class="container mt-4" style="max-width: 600px;">
+<div class="container mt-5" style="max-width: 500px;">
 
-    <h1 class="mb-4"> Nouveau Livre</h1>
+    <div class="text-center mb-4">
+        <h1>➕ Nouveau Livre</h1>
+    </div>
 
-    {{ include('book/_form.html.twig') }}
+    <div class="card" style="background: rgba(20,20,20,0.92); border: 1px solid var(--gold); border-radius: 16px;">
+        <div class="card-body p-4">
+            {{ include('book/_form.html.twig') }}
+        </div>
+    </div>
 
-    <a href="{{ path('app_book_index') }}" class="btn btn-secondary mt-3">← Retour au catalogue</a>
+    <div class="text-center mt-3">
+        <a href="{{ path('app_book_index') }}" class="btn btn-outline-gold">← Retour au catalogue</a>
+    </div>
+
 </div>
 {% endblock %}
